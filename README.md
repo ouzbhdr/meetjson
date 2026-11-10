@@ -2,59 +2,120 @@
 
 # ⚡ MeetJSON
 
-**Ultra-Low-Latency (~0.04 ms) Edge MCP Server & Universal Code / JSON Context Optimizer**
+**Drop-In OpenAI / Anthropic / Gemini BaseURL Proxy & Edge MCP Server (~0.04 ms)**  
+*Cut LLM input token costs by **60% – 99%** with a single environment variable or `baseURL` change.*
 
 [![Website](https://img.shields.io/badge/Website-meetjson.com-00E5FF?style=for-the-badge&logo=cloudflare&logoColor=white)](https://meetjson.com)
-[![MCP Endpoint](https://img.shields.io/badge/MCP_HTTP-api.meetjson.com%2Fmcp-10B981?style=for-the-badge)](https://api.meetjson.com/mcp)
-[![SSE Endpoint](https://img.shields.io/badge/MCP_SSE-api.meetjson.com%2Fsse-6366F1?style=for-the-badge)](https://api.meetjson.com/sse)
+[![BaseURL Gateway](https://img.shields.io/badge/BaseURL-api.meetjson.com%2Fv1-10B981?style=for-the-badge)](https://meetjson.com/docs.html)
+[![MCP Endpoint](https://img.shields.io/badge/MCP-api.meetjson.com%2Fmcp-6366F1?style=for-the-badge)](https://api.meetjson.com/mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](./LICENSE)
 
-Reduce LLM context window bloat and API token costs by **60% – 99%** without losing structural semantics.  
-Works out-of-the-box with **Claude Code, Cursor, Windsurf, Cline, Roo Code, and any MCP client** — or as a zero-code OpenAI/Anthropic Reverse Proxy.
+Works transparently with **Claude Code, Cursor, Cline, Roo Code, Windsurf, OpenAI SDK, Anthropic SDK, LangChain, and 15+ LLM providers** (OpenAI, Anthropic, Gemini, DeepSeek, Groq, OpenRouter, xAI, Mistral).
 
-[**🌐 Live Playground & Dashboard →**](https://meetjson.com) · [**📖 Documentation →**](https://meetjson.com/docs.html) · [**🔑 Get Free API Key →**](https://meetjson.com)
+[**🌐 Live Playground & Token Calculator →**](https://meetjson.com) · [**📖 Documentation →**](https://meetjson.com/docs.html) · [**🔑 Get Free API Key →**](https://meetjson.com)
 
 </div>
 
 ---
 
-## 🚀 Why MeetJSON?
+## 🔥 10-Second Drop-In Setup (Zero Code Changes)
 
-Modern AI coding agents and LLM pipelines burn thousands of tokens reading raw source files, bloated API responses, and repetitive JSON arrays into their context window.
+You don't need to rewrite your prompts or install local daemons. Point your existing `BASE_URL` to MeetJSON — your provider API keys (`sk-ant-...`, `sk-proj-...`, `sk-or-v1-...`, `AIza...`) pass through directly while MeetJSON compresses bloated tool outputs, file reads, and JSON payloads in **~0.04 ms** at the Cloudflare Edge.
 
-**MeetJSON** runs on the global Cloudflare Edge (~0.04 ms processing latency) and provides deterministic, zero-hallucination structural compression before data hits your model:
+### 1. Claude Code (Terminal)
 
-1. **🧬 AST Code Skeleton Extraction (`mode: "code"` / `"auto"`)**  
-   Extracts function signatures, class hierarchies, types, interfaces, and exports while stripping implementation noise. Lets agents understand a 2,000-line file in ~150 tokens before deciding which specific function to edit.
-2. **✂️ Intelligent JSON & Data Pruning (`mode: "json"` / `"auto"`)**  
-   Deduplicates homogeneous array payloads, collapses deep nested structures, and strips null/empty boilerplate while preserving 100% of schema keys and representative data samples.
-3. **🩹 Deterministic Broken JSON & Stream Healer (`mode: "heal"`)**  
-   Instantly repairs truncated LLM JSON outputs, unclosed brackets, trailing commas, unescaped quotes, and markdown-wrapped JSON payloads in sub-millisecond time.
-4. **🧠 Edge Session Memory (`meetjson_state`)**  
-   Lightweight key-value working memory across agent turns so your agent doesn't have to re-read files already analyzed in the session.
+#### PowerShell (Windows)
+```powershell
+$env:ANTHROPIC_BASE_URL = "https://api.meetjson.com/mj_live_YOUR_MEETJSON_KEY"
+claude
+```
+
+#### CMD (Windows)
+```cmd
+set ANTHROPIC_BASE_URL=https://api.meetjson.com/mj_live_YOUR_MEETJSON_KEY
+claude
+```
+
+#### macOS / Linux
+```bash
+export ANTHROPIC_BASE_URL="https://api.meetjson.com/mj_live_YOUR_MEETJSON_KEY"
+claude
+```
+
+*(Or use without a MeetJSON key on the instant free tier: `https://api.meetjson.com`)*
+
+---
+
+### 2. OpenAI / Anthropic / Universal SDKs (Node.js & Python)
+
+#### TypeScript / JavaScript (`openai` or `@anthropic-ai/sdk`)
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY, // Your real OpenAI / OpenRouter / DeepSeek / Groq key
+  baseURL: "https://api.meetjson.com/mj_live_YOUR_MEETJSON_KEY/v1"
+});
+
+const res = await client.chat.completions.create({
+  model: "gpt-6-sol", // or claude-sonnet-5-5, gemini-4-argon, deepseek-chat
+  messages: [{ role: "user", content: "Analyze this payload..." }]
+});
+```
+
+#### Python (`openai` / `anthropic`)
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-...",
+    base_url="https://api.meetjson.com/mj_live_YOUR_MEETJSON_KEY/v1",
+)
+```
+
+---
+
+### 3. Cursor / Cline / Roo Code / Continue.dev
+
+In your IDE settings under **Override OpenAI Base URL** or **Anthropic Base URL**, paste:
+```text
+https://api.meetjson.com/mj_live_YOUR_MEETJSON_KEY/v1
+```
+
+Supported provider routes out-of-the-box:
+- **Anthropic (`/v1/messages`):** `https://api.meetjson.com/v1`
+- **OpenAI (`/v1/chat/completions`, `/v1/responses`):** `https://api.meetjson.com/v1`
+- **Google Gemini:** `https://api.meetjson.com/v1/gemini`
+- **OpenRouter:** `https://api.meetjson.com/v1/openrouter`
+- **DeepSeek / Groq / Mistral / xAI:** `https://api.meetjson.com/v1/{deepseek|groq|mistral|xai}`
+
+---
+
+## 🧠 What Happens Under the Hood in 0.04 ms?
+
+1. **🧬 AST Code Skeleton Extraction:** Strips implementation noise from large source files in conversation history while keeping 100% of function signatures, types, interfaces, and exports intact.
+2. **✂️ Intelligent JSON & Log Pruning:** Deduplicates homogeneous JSON arrays (e.g., 500 database rows or API items → schema + representative sample) and strips null/empty boilerplate before sending to the upstream LLM.
+3. **🩹 Real-Time Broken JSON & Stream Healer:** Automatically repairs truncated JSON tool calls, unclosed brackets, and unescaped quotes on the fly.
+4. **📊 Live Savings Telemetry:** Every response includes `X-MeetJSON-Saved-Tokens` headers and real-time cost analytics in the [MeetJSON Cockpit](https://meetjson.com).
 
 ---
 
 ## 📊 Token & Cost Savings Benchmark (2026 Flagship Models)
 
-Based on standard production input pricing (~$2.00 – $3.00 / 1M tokens for **Claude Sonnet 5.5**, **GPT-6 Sol**, **Gemini 4 Argon**, and $4.00 – $10.00 / 1M tokens for **Claude Opus 5.5** / **GPT-6 Astra**):
+Evaluated against production input pricing (~$2.00 – $3.00 / 1M tokens for **Claude Sonnet 5.5**, **GPT-6 Sol**, **Gemini 4 Argon**, and $4.00 – $10.00 / 1M tokens for **Claude Opus 5.5** / **GPT-6 Astra**):
 
-| Payload Type | Raw Tokens | MeetJSON Tokens | Reduction | Latency |
+| Workload / Payload Type | Raw Input Tokens | Via MeetJSON BaseURL | Token Savings | Edge Overhead |
 | :--- | :---: | :---: | :---: | :---: |
-| **TypeScript / Python Module (1,500 LOC)** | ~14,200 | ~1,850 | **-87.0%** | `0.06 ms` |
+| **Claude Code 30-Turn Repo Refactor** | ~410,000 | ~89,000 | **-78.3%** | `0.06 ms` |
 | **REST / GraphQL JSON Array (500 items)** | ~68,400 | ~1,920 | **-97.2%** | `0.04 ms` |
-| **OpenAPI / Swagger Specification** | ~42,000 | ~4,100 | **-90.2%** | `0.05 ms` |
-| **Truncated / Broken LLM JSON Stream** | Invalid | Valid JSON | **Healed 100%** | `0.03 ms` |
+| **TypeScript / Python Module (1,500 LOC)** | ~14,200 | ~1,850 | **-87.0%** | `0.05 ms` |
+| **Truncated / Malformed JSON Tool Output** | `SyntaxError` | Valid JSON | **100% Healed** | `0.03 ms` |
 
 ---
 
-## 🔌 Quick Setup (MCP Server)
+## 🔌 Native Remote MCP Server (Optional)
 
-MeetJSON is a native remote MCP server supporting both **Streamable HTTP** (`https://api.meetjson.com/mcp`) and **SSE** (`https://api.meetjson.com/sse`). No local Docker container or heavy binary required.
-
-### 1. Cursor / Windsurf / Claude Desktop (`mcp.json`)
-
-Add the following to your `.cursor/mcp.json`, `~/.codeium/windsurf/mcp_config.json`, or `claude_desktop_config.json`:
+In addition to the BaseURL proxy, MeetJSON exposes a native remote MCP server (`meetjson_process` & `meetjson_state`):
 
 ```json
 {
@@ -62,75 +123,17 @@ Add the following to your `.cursor/mcp.json`, `~/.codeium/windsurf/mcp_config.js
     "meetjson": {
       "url": "https://api.meetjson.com/mcp",
       "headers": {
-        "Authorization": "Bearer YOUR_MEETJSON_API_KEY"
+        "Authorization": "Bearer mj_live_YOUR_MEETJSON_KEY"
       }
     }
   }
 }
 ```
 
-*(Using an SSE-only client? Use `"url": "https://api.meetjson.com/sse"` instead.)*
-
-### 2. Claude Code CLI
-
-#### macOS / Linux / PowerShell
-```bash
-claude mcp add --transport http meetjson https://api.meetjson.com/mcp --header "Authorization: Bearer YOUR_MEETJSON_API_KEY"
-```
-
----
-
-## 🛠️ Available MCP Tools
-
-### `meetjson_process`
-Compresses code or JSON payloads, extracts AST skeletons, or heals malformed JSON.
-- `input` *(string, required)*: Raw source code, JSON string, log output, or malformed JSON stream.
-- `mode` *(string, optional)*: `"auto"` (default), `"code"`, `"json"`, or `"heal"`.
-
-### `meetjson_state`
-Stores and retrieves compressed structural summaries across agent steps.
-- `action` *(string, required)*: `"get"`, `"set"`, `"delete"`, or `"list"`.
-- `key` *(string, optional)*: Identifier for the state entry.
-- `value` *(string, optional)*: Data to persist when `action` is `"set"`.
-
----
-
-## ⚡ Direct HTTP API & Zero-Code LLM Proxy
-
-Want to use MeetJSON directly from your backend or CLI?
-
-### PowerShell (Windows)
-```powershell
-$body = @{
-  input = '{"users":[{"id":1,"name":"Alice","role":"admin"},{"id":2,"name":"Bob","role":"user"}]}'
-  mode  = "auto"
-} | ConvertTo-Json
-
-Invoke-RestMethod -Method Post -Uri "https://api.meetjson.com/v1/process" `
-  -Headers @{ "Authorization" = "Bearer YOUR_MEETJSON_API_KEY" } `
-  -ContentType "application/json" -Body $body
-```
-
-### CMD (Windows)
-```cmd
-curl.exe -X POST https://api.meetjson.com/v1/process ^
-  -H "Authorization: Bearer YOUR_MEETJSON_API_KEY" ^
-  -H "Content-Type: application/json" ^
-  -d "{"input": "{\"users\":[{\"id\":1,\"name\":\"Alice\"}]}", "mode": "auto"}"
-```
-
-### macOS / Linux
-```bash
-curl -X POST https://api.meetjson.com/v1/process \
-  -H "Authorization: Bearer YOUR_MEETJSON_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"input": "{\"users\":[{\"id\":1,\"name\":\"Alice\"}]}", "mode": "auto"}'
-```
-
 ---
 
 ## 🔗 Links
 
-- **Website & Interactive Demo:** [https://meetjson.com](https://meetjson.com)
+- **Website & Live Cockpit:** [https://meetjson.com](https://meetjson.com)
 - **Full Documentation:** [https://meetjson.com/docs.html](https://meetjson.com/docs.html)
 - **Author:** OUZ ([@ouzbhdr](https://github.com/ouzbhdr) · X/Twitter: [@ouz_bhdr](https://x.com/ouz_bhdr))
