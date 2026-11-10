@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "meetjson": {
+      "url": "https://api.meetjson.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_MEETJSON_API_KEY"
+      }
+    }
+  }
+}
